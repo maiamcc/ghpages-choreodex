@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>JP ECD — Print</title>
+	<link rel="stylesheet" href="/bundle/xzQM8QwJ7o.css">
+	<style>
+	/* ============================================================
+	   print-base.njk — shell for the Paged.js program print preview.
+
+	   Paged.js paginates the content into real `.pagedjs_page` boxes and
+	   draws them on a gray "desktop" on screen — so the preview IS the
+	   printed page. We only provide the page chrome (sidebar shell, body
+	   reset) here; page content is styled by /static/css/print-paged.css,
+	   handed to Paged.js at render time.
+	   ============================================================ */
+	:root {
+		--color-surface: #ffffff;
+		--color-border: #ddd;
+		--color-text: #1a1a1a;
+		--color-text-muted: #5a5a5a;
+		--color-accent: #3b6fce;
+		--space-xs: 0.25rem;
+		--space-sm: 0.5rem;
+		--space-md: 1rem;
+		--space-lg: 1.5rem;
+		--space-xl: 2rem;
+		--space-2xl: 3rem;
+		--text-sm: 0.8125rem;
+		--radius-sm: 3px;
+	}
+
+	*, *::before, *::after { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		padding: 0;
+		background: #fff;
+		color: var(--color-text);
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+		font-size: 1rem;
+		line-height: 1.6;
+	}
+
+	[hidden] { display: none !important; }
+
+	a { color: var(--color-accent); text-decoration: none; }
+
+	@media print {
+		a { color: #000; }
+		a[href]:after { content: none !important; }
+	}
+	</style>
+	<script>window.PATH_PREFIX = "/";</script>
+</head>
+<body>
+
+
+
+
+
+
+<style>
+/* ============================================================
+   print.njk — settings sidebar + Paged.js preview shell.
+
+   The page is split into a sticky settings sidebar (screen only) and
+   a main area. `#print-source` holds the un-paginated content (hidden);
+   program-print.js clones + filters it per the settings and hands it to
+   Paged.js, which renders real page boxes into `#print-render`.
+   ============================================================ */
+
+/* ── Screen layout ── */
+@media screen {
+	.print-page {
+		display: grid;
+		grid-template-columns: 260px 1fr;
+		min-height: 100vh;
+	}
+
+	.print-sidebar {
+		position: sticky;
+		top: 0;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		border-right: 1px solid var(--color-border);
+		background: var(--color-surface);
+		z-index: 2;
+	}
+
+	.print-sidebar-top {
+		padding: var(--space-md) var(--space-lg);
+		border-bottom: 1px solid var(--color-border);
+		flex-shrink: 0;
+	}
+
+	.print-sidebar-body {
+		flex: 1;
+		overflow-y: auto;
+		padding: var(--space-md) var(--space-lg) var(--space-lg);
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Gray "desktop" behind the rendered pages. */
+	.print-main {
+		background: #c8c8c8;
+		min-width: 0;
+		padding: var(--space-lg);
+		overflow-x: hidden;
+	}
+
+	/* Center the rendered pages and (when the viewport is narrower than a
+	   page) scale them down to fit. program-print.js applies a transform:scale
+	   to .pagedjs_pages — transform scales the page box and all its text
+	   uniformly on every browser (unlike `zoom`, which WebKit resolves
+	   differently for rem vs pt, drifting the page-to-text ratio). max-content
+	   makes the container hug the page width so the centered scale stays put.
+	   Paged.js's own print CSS resets the transform, so printing is untouched. */
+	.print-render {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.print-render .pagedjs_pages {
+		width: max-content;
+		transform-origin: top center;
+	}
+
+	/* Page chrome — Paged.js draws no page background/shadow on its own. */
+	.print-render .pagedjs_sheet {
+		background: #fff;
+		box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+		margin-bottom: var(--space-lg);
+	}
+
+	/* While (re)paginating, dim the stale pages so the refresh reads
+	   as intentional rather than a flicker. */
+	.print-render.is-rendering { opacity: 0.45; transition: opacity 0.1s; }
+
+	/* Empty state / first paint before Paged.js has run */
+	.print-render:empty::before {
+		content: "Rendering preview…";
+		display: block;
+		text-align: center;
+		color: var(--color-text-muted);
+		font-size: var(--text-sm);
+		padding: var(--space-2xl);
+	}
+
+	/* Nothing checked under "What to print" — there is no render coming. */
+	.print-render.is-empty:empty::before {
+		content: "Nothing selected to print — check at least one item under “What to print.”";
+	}
+}
+
+/* ── Narrow screens (phones): stack the sidebar above the preview ── */
+@media screen and (max-width: 768px) {
+	.print-page { display: block; }
+
+	/* display:contents dissolves the sidebar's box so .print-sidebar-top's
+	   containing block becomes the whole page — letting the button bar stay
+	   stuck to the top through the entire scroll (settings + preview), not just
+	   until the settings end. The note lives in the body, so it scrolls away. */
+	.print-sidebar { display: contents; }
+
+	.print-sidebar-top {
+		position: sticky;
+		top: 0;
+		z-index: 3;
+		background: var(--color-surface);
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.print-sidebar-body { overflow-y: visible; }
+}
+
+/* ── Print: only the rendered pages should reach paper ── */
+@media print {
+	.print-sidebar { display: none !important; }
+	#print-source { display: none !important; }
+	.print-page { display: block; }
+	.print-main { padding: 0; background: none; overflow: visible; }
+	/* Drop the on-screen fit-to-width compensation (Paged.js resets the
+	   transform itself; clear the paired negative margin too). */
+	.print-render .pagedjs_pages { margin-bottom: 0 !important; }
+}
+
+/* ── Sidebar elements (screen only — sidebar is display:none in print) ── */
+.print-sidebar-heading {
+	font-size: var(--text-sm);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: var(--color-text-muted);
+	margin: 0 0 var(--space-md);
+}
+
+.print-trigger-btn {
+	width: 100%;
+	font-size: var(--text-sm);
+	font-family: inherit;
+	font-weight: 600;
+	padding: var(--space-sm) var(--space-md);
+	border: 1px solid var(--color-accent);
+	border-radius: var(--radius-sm);
+	background: var(--color-accent);
+	color: #fff;
+	cursor: pointer;
+	transition: opacity 0.15s;
+}
+
+.print-trigger-btn:hover { opacity: 0.85; }
+.print-trigger-btn:disabled { opacity: 0.5; cursor: progress; }
+
+.print-trigger-btn--secondary {
+	margin-top: var(--space-sm);
+	background: var(--color-surface);
+	color: var(--color-accent);
+}
+
+/* The "Open as PDF" button doubles as the background-render progress bar.
+   Three states:
+   • resting  — plain outline button (PDF not built yet for these settings)
+   • building — an accent fill (::before, scaled by --pdf-progress) sweeps
+     left→right as pages rasterize; status is in the title (tooltip)
+   • ready    — the fill has reached full, so we lock it to a solid accent
+     CTA (.is-ready) that stays put. It never un-fills; only a settings
+     change resets it to resting, which coincides with a genuine rebuild. */
+.print-trigger-btn--pdf {
+	position: relative;
+	overflow: hidden;
+	--pdf-progress: 0;
+}
+.print-trigger-btn--pdf::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	transform-origin: left;
+	transform: scaleX(var(--pdf-progress, 0));
+	background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+	pointer-events: none;
+}
+.print-trigger-btn--pdf.is-building::before { transition: transform 0.3s ease; }
+.print-trigger-btn--pdf > span { position: relative; z-index: 1; }
+
+/* Ready: a solid accent button, clearly finished and clickable. */
+.print-trigger-btn--pdf.is-ready {
+	background: var(--color-accent);
+	color: #fff;
+}
+.print-trigger-btn--pdf.is-ready::before { display: none; }
+
+/* Visually hidden, but kept in the a11y tree so the build progress and
+   "PDF ready" state are still announced to screen readers. */
+.print-pdf-status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.print-fieldset {
+	border: none;
+	margin: 0;
+	padding: 0;
+}
+
+.print-legend {
+	font-size: var(--text-sm);
+	font-weight: 700;
+	color: var(--color-text);
+	margin-bottom: var(--space-xs);
+	padding: 0;
+	display: block;
+	width: 100%;
+}
+
+.print-label {
+	display: flex;
+	align-items: center;
+	gap: var(--space-xs);
+	font-size: var(--text-sm);
+	color: var(--color-text);
+	cursor: pointer;
+	user-select: none;
+	padding: 2px 0;
+}
+
+.print-label:hover { color: var(--color-accent); }
+
+.print-check {
+	accent-color: var(--color-accent);
+	width: 14px;
+	height: 14px;
+	cursor: pointer;
+	flex-shrink: 0;
+}
+
+.print-select {
+	width: 100%;
+	font-family: inherit;
+	font-size: var(--text-sm);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	background: var(--color-surface);
+	color: var(--color-text);
+	padding: var(--space-xs) var(--space-sm);
+	margin-top: 4px;
+	cursor: pointer;
+}
+
+.print-divider {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: var(--space-md) 0;
+}
+
+.print-back-area {
+	margin-top: auto;
+	padding-top: var(--space-lg);
+}
+
+.print-back-link {
+	display: block;
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	text-decoration: none;
+}
+
+.print-back-link:hover { color: var(--color-accent); }
+
+.print-close-btn {
+	display: block;
+	width: 100%;
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	cursor: pointer;
+	text-align: left;
+	font-family: inherit;
+}
+
+.print-close-btn:hover { color: var(--color-accent); }
+
+.print-size-input {
+	width: 4.5rem;
+	font-family: inherit;
+	font-size: var(--text-sm);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	padding: 2px var(--space-xs);
+	color: var(--color-text);
+}
+
+.print-custom-size-fields {
+	padding: 4px 0 0 var(--space-md);
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.print-orient-row {
+	display: flex;
+	gap: var(--space-md);
+	margin-top: var(--space-xs);
+}
+
+/* ── Text-size stepper: [A−] ——●—— [A＋] with snap divots ── */
+.print-textsize {
+	display: flex;
+	align-items: center;
+	gap: var(--space-sm);
+	margin-top: var(--space-xs);
+}
+
+.print-textsize-btn {
+	flex-shrink: 0;
+	width: 26px;
+	height: 26px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	background: var(--color-surface);
+	color: var(--color-text);
+	font-family: Georgia, "Times New Roman", serif;
+	font-weight: 700;
+	font-size: 11px;
+	line-height: 1;
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
+}
+
+.print-textsize-btn--lg { font-size: 17px; }
+.print-textsize-btn:hover:not(:disabled) { border-color: var(--color-accent); color: var(--color-accent); }
+.print-textsize-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* The divots sit behind the range; both span the same box so a divot lands
+   under each snap position. The track/divots are inset by half the thumb
+   width (7px) so the end divots align with the thumb's travel extremes. */
+.print-textsize-track {
+	position: relative;
+	flex: 1;
+	height: 26px;
+	display: flex;
+	align-items: center;
+}
+
+.print-textsize-divots {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	justify-content: space-between;
+	padding: 0 7px;
+	pointer-events: none;
+}
+
+.print-textsize-divots span {
+	width: 3px;
+	height: 3px;
+	border-radius: 50%;
+	background: var(--color-border);
+}
+
+.print-textsize-range {
+	-webkit-appearance: none;
+	appearance: none;
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 26px;
+	margin: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.print-textsize-range::-webkit-slider-runnable-track {
+	height: 2px;
+	border-radius: 1px;
+	background: var(--color-border);
+}
+
+.print-textsize-range::-moz-range-track {
+	height: 2px;
+	border-radius: 1px;
+	background: var(--color-border);
+}
+
+.print-textsize-range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 14px;
+	height: 14px;
+	margin-top: -6px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	border: 2px solid var(--color-surface);
+	box-shadow: 0 0 0 1px var(--color-border);
+	cursor: pointer;
+}
+
+.print-textsize-range::-moz-range-thumb {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	border: 2px solid var(--color-surface);
+	box-shadow: 0 0 0 1px var(--color-border);
+	cursor: pointer;
+}
+
+.print-textsize-range:focus-visible { outline: none; }
+.print-textsize-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--color-accent); }
+.print-textsize-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px var(--color-accent); }
+
+.print-textsize-value {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	margin: var(--space-sm) 0 0;
+	text-align: center;
+}
+
+.print-hint {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	font-style: italic;
+	margin: var(--space-xs) 0 0 1.25rem;
+	line-height: 1.35;
+}
+</style>
+
+<div class="print-page">
+
+	<!-- ============================================================
+	     SETTINGS SIDEBAR (screen only)
+	     ============================================================ -->
+	<aside class="print-sidebar">
+		<div class="print-sidebar-top">
+			<button type="button" class="print-trigger-btn" id="print-trigger-btn">Print</button>
+			<button type="button" class="print-trigger-btn print-trigger-btn--secondary print-trigger-btn--pdf" id="print-pdf-btn"><span>Open as PDF</span></button>
+			<p class="print-pdf-status" id="print-pdf-status" role="status" aria-live="polite"></p>
+		</div>
+		<div class="print-sidebar-body">
+		<p class="print-sidebar-heading">Settings</p>
+		<form id="print-settings-form">
+			<fieldset class="print-fieldset">
+				<legend class="print-legend">Page size</legend>
+				<select name="print-page-size" id="print-page-size" class="print-select">
+					<option value="letter">US Letter (8.5 × 11 in)</option>
+					<option value="3x5">3 × 5 in</option>
+					<option value="4x6">4 × 6 in</option>
+					<option value="custom">Custom</option>
+				</select>
+				<div id="print-custom-size-fields" class="print-custom-size-fields" hidden="">
+					<label class="print-label">W: <input type="number" name="print-page-width" class="print-size-input" step="0.25" min="1" max="36" value="8.5"> in</label>
+					<label class="print-label">H: <input type="number" name="print-page-height" class="print-size-input" step="0.25" min="1" max="36" value="11"> in</label>
+				</div>
+				<div class="print-orient-row">
+					<label class="print-label">
+						<input type="radio" name="print-orient" value="portrait" class="print-check" checked=""> Portrait
+					</label>
+					<label class="print-label">
+						<input type="radio" name="print-orient" value="landscape" class="print-check"> Landscape
+					</label>
+				</div>
+				<p class="print-hint" id="print-orient-hint" hidden="">The table always prints landscape.</p>
+			</fieldset>
+
+			<hr class="print-divider">
+			<fieldset class="print-fieldset">
+				<legend class="print-legend">Text size</legend>
+				<div class="print-textsize">
+					<button type="button" class="print-textsize-btn" id="print-text-dec" aria-label="Smaller text">A</button>
+					<div class="print-textsize-track">
+						<div class="print-textsize-divots" aria-hidden="true">
+							<span></span><span></span><span></span><span></span><span></span>
+						</div>
+						<input type="range" name="print-text-size" id="print-text-range" class="print-textsize-range" min="8" max="12" step="1" value="10" aria-label="Text size in points">
+					</div>
+					<button type="button" class="print-textsize-btn print-textsize-btn--lg" id="print-text-inc" aria-label="Larger text">A</button>
+				</div>
+				<p class="print-textsize-value" id="print-text-value" aria-live="polite">Normal · 10 pt</p>
+			</fieldset>
+
+			<hr class="print-divider">
+			<fieldset class="print-fieldset">
+				<legend class="print-legend">What to print</legend>
+				<label class="print-label">
+					<input type="checkbox" name="print-toc" class="print-check" checked=""> Table of Contents
+				</label>
+				<label class="print-label">
+					<input type="checkbox" name="print-cards" class="print-check" checked=""> Dance Cards
+				</label>
+				<label class="print-label">
+					<input type="checkbox" name="print-table" class="print-check"> Table
+				</label>
+			</fieldset>
+
+			
+			<hr class="print-divider">
+			<fieldset class="print-fieldset" id="print-sections-fieldset">
+				<legend class="print-legend">Sections</legend>
+				
+				<label class="print-label">
+					<input type="checkbox" name="print-section" value="0" class="print-check" checked="">
+					First Half
+				</label>
+				
+				<label class="print-label">
+					<input type="checkbox" name="print-section" value="1" class="print-check" checked="">
+					Second Half
+				</label>
+				
+				<label class="print-label">
+					<input type="checkbox" name="print-section" value="2" class="print-check" checked="">
+					Alternates
+				</label>
+				
+			</fieldset>
+			
+
+			<hr class="print-divider" id="print-card-options-divider">
+			<fieldset class="print-fieldset" id="print-card-options-fieldset">
+				<legend class="print-legend">Dance card options</legend>
+				<label class="print-label">
+					<input type="checkbox" name="print-card-choreo" class="print-check" checked=""> Choreography
+				</label>
+				<label class="print-label">
+					<input type="checkbox" name="print-card-tunes" class="print-check" checked=""> Tune info
+				</label>
+				<label class="print-label">
+					<input type="checkbox" name="print-card-teaching-notes" class="print-check" checked=""> Teaching notes
+				</label>
+				<label class="print-label">
+					<input type="checkbox" name="print-card-notes" class="print-check" checked=""> Background notes
+				</label>
+			</fieldset>
+
+			<hr class="print-divider" id="print-table-cols-divider">
+			<fieldset class="print-fieldset" id="print-table-cols-fieldset">
+				<legend class="print-legend">Table columns</legend>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="title" class="print-check" checked=""> Title</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="choreographer" class="print-check" checked=""> Choreographer</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="year" class="print-check" checked=""> Year</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="formation" class="print-check" checked=""> Formation</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="key" class="print-check" checked=""> Key</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="meter" class="print-check" checked=""> Meter</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="tune" class="print-check" checked=""> Tune</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="composer" class="print-check" checked=""> Composer</label>
+				
+				<label class="print-label"><input type="checkbox" name="print-col" value="source" class="print-check" checked=""> Source</label>
+				
+			</fieldset>
+
+		</form>
+
+		<div class="print-back-area">
+			<button type="button" class="print-close-btn" id="print-close-btn">← Close</button>
+			<a href="/programs/jp-ecd-7-14-2026/" class="print-back-link" id="print-back-link">← Back to program</a>
+		</div>
+		</div>
+	</aside>
+
+	<!-- ============================================================
+	     MAIN — Paged.js renders into #print-render; #print-source is
+	     the hidden, un-paginated content the renderer clones from.
+	     ============================================================ -->
+	<main class="print-main">
+		<div id="print-render" class="print-render" aria-live="polite" aria-busy="true"></div>
+
+		<div id="print-source" hidden="">
+
+			<!-- TOC VIEW -->
+			<div data-print-view="toc">
+				<div class="print-program-header">
+					<h1 class="program-title">JP ECD</h1>
+					<p class="program-meta">July 14, 2026 · First Church In Jamaica Plain, 6 Eliot St, Boston, MA 02130, USA</p>
+				</div>
+
+				
+				
+
+
+<div class="program-section" data-section-index="0">
+	<h2 class="program-section-label">First Half</h2>
+	<ol class="program-dance-list">
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/mile-of-smiles/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Mile Of Smiles</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Joseph Pimentel</span>
+			</div>
+			<div class="program-dance-note">Clara</div>
+		</li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Jacks Health <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Elizabeth <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Cockle Shells <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Mais Oui <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Saint Margarets Hill <span class="missing-note">(not found)</span></div></li>
+		
+		
+	</ol>
+</div>
+
+<div class="program-section" data-section-index="1">
+	<h2 class="program-section-label">Second Half</h2>
+	<ol class="program-dance-list">
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Pluck Me A Fig <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Glassblowers Dream <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/childgrove/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Childgrove</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Playford</span>
+			</div>
+			<div class="program-dance-note">Harris</div>
+		</li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Upon A Summers Day <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/old-wife-behind-the-fire/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Old Wife Behind the Fire</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Neal</span>
+			</div>
+			<div class="program-dance-note">Clara</div>
+		</li>
+		
+		
+	</ol>
+</div>
+
+<div class="program-section" data-section-index="2">
+	<h2 class="program-section-label">Alternates</h2>
+	<ol class="program-dance-list">
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Domino Five <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/alice/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Alice</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Philippe Callens</span>
+			</div>
+			
+		</li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Lilliburlero <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/mendocino-redwood/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Mendocino Redwood</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Mary Devlin, Bob Fraley, Elizabeth Zekley</span>
+			</div>
+			
+		</li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item program-dance-missing"><div>Chocolate Equation <span class="missing-note">(not found)</span></div></li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/peridot-ring/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Peridot Ring</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Susan Kevra</span>
+			</div>
+			
+		</li>
+		
+		
+		
+		
+		
+		
+		<li class="program-dance-item">
+			<div class="program-dance-main">
+				<a class="program-dance-link" href="/dances/faithless-nancy-dawson/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Faithless Nancy Dawson</a>
+				<span class="dance-type-badge dance-type--english">english</span>
+				<span class="program-dance-author">Anna Bidder</span>
+			</div>
+			
+		</li>
+		
+		
+	</ol>
+</div>
+
+
+			</div>
+
+			<!-- CARDS VIEW -->
+			<div data-print-view="cards">
+				
+				<div class="print-cards-section" data-section-index="0">
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Mile Of Smiles</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Joseph Pimentel</span>
+			<span class="year">(2012)</span>
+			
+		</p>
+		<p class="dance-formation">duple minor longways</p>
+		<p class="dance-header-description">standard A part with a chase in the B, still mostly glossary moves.</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	
+	
+	<span class="tune-detail">Dave Wiesler</span>
+	
+	
+	<span class="tune-detail">4/4</span>
+	<span class="tune-detail">C major</span>
+	<span class="tune-detail">2011</span>
+	<span class="tune-detail">BIII p. 94</span>
+	
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--1">easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">1<sup>st</sup> corners set and turn single</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">1<sup>st</sup> corners 2-hand turn 1x</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(all home)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-8)</span>
+					<span class="figure-description">2<sup>nd</sup> corners, the same</span>
+					<span class="figure-beats">(16)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(all home)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">[caller’s L] 1<sup>st</sup> robin cast down into second place and across the set, P following</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>while</em> 2s move up</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Neighbors R-hand turn 1x</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">[caller’s L] 2<sup>nd</sup> robin cast down into second place and across the set, P following</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>while</em> 1s move up</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(unprogressed places, opposite home side)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-6)</span>
+					<span class="figure-description">All R-hand star halfway</span>
+					<span class="figure-beats">(4)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(7-8)</span>
+					<span class="figure-description">Turn single left</span>
+					<span class="figure-beats">(4)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(new 1<sup>st</sup> Cs, acknowledge)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+<section class="background-section">
+	<h2>Background</h2>
+	<div><p>Pimentel:</p>
+<blockquote>
+<p>For Dave Wiesler, an awesome pianist and tunesmith. Dave wrote the tune and dedicated it to his mother, Helen Wiesler, who grew up on a farm in southern Indiana called 'Mile of Smiles.'</p>
+</blockquote>
+</div>
+</section>
+
+
+<section class="teaching-notes-section">
+	<h2>Teaching Notes</h2>
+	<div><p>After the N R-hand turn, the 2s are already both facing the correct direction out of the set (caller’s L).</p>
+<p>Original choreo indicates that during the chase figure, inactive couples only move up after 4 counts of waiting, but in practice I don’t think anyone does this.</p>
+<p>Technically the chase figure lands the couple that did it in “improper”.</p>
+</div>
+</section>
+
+
+	
+</article>
+
+					</div>
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+				</div>
+				
+				<div class="print-cards-section" data-section-index="1">
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Childgrove</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Playford</span>
+			<span class="year">(1701)</span>
+			<span class="interpreted-by">Interp. Cecil Sharp (1922)</span>
+		</p>
+		<p class="dance-formation">duple minor longways <span class="formation-note">(originally published improper)</span></p>
+		<p class="dance-header-description">siding, full fig 8. Different speeds of 2HT.</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	
+	
+	
+	
+	
+	<span class="tune-detail">2/2</span>
+	<span class="tune-detail">D minor</span>
+	
+	<span class="tune-detail">BI p. 20</span>
+	<span class="tune-sep no-print"> · </span><a class="dots-link no-print" href="/static/dots/childgrove.png" target="_blank">Sheet music ↗</a>
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--1">easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Partners side across (L sh, R sh, swirly)</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Partners back to back (8) <em>(face N on side)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-8)</span>
+					<span class="figure-description">Repeat A1 with neighbor along</span>
+					<span class="figure-beats">(16)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Neighbors two hand turn 1 ½ (opt: skipping), open up across</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Partners two hand turn</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(All progressed)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-8)</span>
+					<span class="figure-description">Ones figure eight up through the twos (opt.: skipping)</span>
+					<span class="figure-beats">(16)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+
+<section class="teaching-notes-section">
+	<h2>Teaching Notes</h2>
+	<div><p>As: Transition from siding into back-to-back is very slick; from back-to-back P -&gt; siding N by L has a momentum change.</p>
+<p>B1: Can explicitly note that the two hand turns have different speeds or let dancers figure it out.</p>
+<p>B2: Can be a double figure eight for more experienced dancers.</p>
+</div>
+</section>
+
+
+	
+</article>
+
+					</div>
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Old Wife Behind the Fire</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Neal</span>
+			<span class="year">(1726)</span>
+			<span class="interpreted-by">Interp. Fogg/Jackson (1990)</span>
+		</p>
+		<p class="dance-formation">duple minor longways</p>
+		<p class="dance-header-description">glossary (set, cast, lines of 4, Rs and Ls)</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	
+	
+	
+	
+	
+	<span class="tune-detail">4/4</span>
+	<span class="tune-detail">G mixolydian</span>
+	
+	<span class="tune-detail">BII p. 97</span>
+	<span class="tune-sep no-print"> · </span><a class="dots-link no-print" href="/static/dots/old-wife.png" target="_blank">Sheet music ↗</a>
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--0">v. easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">1s set, cast down <em>while</em> 2s lead up</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">1s two hand turn</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">2s set, cast down <em>while</em> 1s lead up</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">2s two hand turn</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(All home)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">1s cross, go below <em>while</em> 2s move up</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">2s cross, go below, come up the center</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>while</em> 1s move up and cast onto ends of a line of 4</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Up a double, fall back, bend the line</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Two changes rights and lefts (PR, NL)</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+
+
+	
+</article>
+
+					</div>
+					
+					
+				</div>
+				
+				<div class="print-cards-section" data-section-index="2">
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Alice</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Philippe Callens</span>
+			<span class="year">(2002)</span>
+			
+		</p>
+		<p class="dance-formation">duple minor longways</p>
+		<p class="dance-header-description">graceful waltz dance, accessible, low on Figures(tm)</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	<span class="tune-title">Siciliano</span>
+	
+	<span class="tune-detail">Georg Telemann</span>
+	
+	
+	<span class="tune-detail">3/4</span>
+	<span class="tune-detail">A major</span>
+	<span class="tune-detail">1716</span>
+	<span class="tune-detail">BII p. 3</span>
+	<span class="tune-sep no-print"> · </span><a class="dots-link no-print" href="/static/dots/alice.png" target="_blank">Sheet music ↗</a>
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--0">v. easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">1<sup>st</sup> corners set in place, right hand turn half</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">2<sup>nd</sup> corners, the same</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-2)</span>
+					<span class="figure-description">All fall back (without hands) in two single steps</span>
+					<span class="figure-beats">(6)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(3-4)</span>
+					<span class="figure-description">Cross, passing partner by right shoulder</span>
+					<span class="figure-beats">(6)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description">Turn to face clockwise around the minor set</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Single file chase clockwise</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(9-12)</span>
+					<span class="figure-description">Partners two hand turn</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+
+<section class="teaching-notes-section">
+	<h2>Teaching Notes</h2>
+	<div><p>A1/A2. Sets are in place, without moving forward</p>
+</div>
+</section>
+
+
+	
+</article>
+
+					</div>
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Mendocino Redwood</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		<a href="https://www.youtube.com/watch?v=2u5Uoqjt5zs" class="dance-video-link no-print" target="_blank" rel="noopener">Video ↗</a>
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Mary Devlin, Bob Fraley, Elizabeth Zekley</span>
+			<span class="year">(2005)</span>
+			
+		</p>
+		<p class="dance-formation">duple minor longways</p>
+		<p class="dance-header-description">half fig-8 practice, diags. vs corners, stars.</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	<span class="tune-title">Woodlands Walk</span>
+	
+	<span class="tune-detail">Jonathan Jensen</span>
+	
+	
+	<span class="tune-detail">6/8</span>
+	<span class="tune-detail">D minor</span>
+	<span class="tune-detail">2005</span>
+	<span class="tune-detail">BIII p. 92</span>
+	
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--0">v. easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Up a double, fall back</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">2s half figure eight up through 1s</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Down a double, fall back</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">1s half figure eight down through 2s</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-8)</span>
+					<span class="figure-description">Star R, Star L</span>
+					<span class="figure-beats">(16)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-2)</span>
+					<span class="figure-description">2<sup>nd</sup> diagonal (orig. 1<sup>st</sup> corners) change by L</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(3-4)</span>
+					<span class="figure-description">1<sup>st</sup> diagonal (orig. 2<sup>nd</sup> corners) change by R</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Partners 2 hand turn, open facing up</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+
+
+	
+</article>
+
+					</div>
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Peridot Ring</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Susan Kevra</span>
+			<span class="year">(2017)</span>
+			
+		</p>
+		<p class="dance-formation">3-couple longways</p>
+		<p class="dance-header-description">practice swirly siding, meanwhiles, your position in a 3C.</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	
+	
+	<span class="tune-detail">Rachel Bell</span>
+	
+	
+	<span class="tune-detail">2/2</span>
+	<span class="tune-detail">C major</span>
+	<span class="tune-detail">2017</span>
+	<span class="tune-detail">BIII p. 109</span>
+	
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--0">v. easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Taking inside hands, partners lead up a double and back, turning in toward partner to face down</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Lead down a double and fall back</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Partners swirly siding (over by L, back by R)</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">All set to P and turn single R</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Hands 6 circle L ½, drop hands and face partner</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">(w/o hands partner) balance F&amp;B, cross by R, turn over R to face partner</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(3-2-1 proper)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">Top couple (3s) cross by R, go below to middle place</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>while</em> middle couple lead up</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>while</em> bottom couple back to back</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Partners 2-hand turn (middles 1 ½, others 1x)</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description"><em>(Ending 2-3-1)</em></span>
+					<span class="figure-beats"></span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+
+<section class="teaching-notes-section">
+	<h2>Teaching Notes</h2>
+	<div><p><strong>For a 2C set</strong>: in B1, circle 1x; in B2, everyone two hand turn 1x</p>
+<p><strong>For a 4C set</strong>: 4s don’t dance B1 (only top three circle and cross); instead of bottoms back to back, original 1s (now in 3<sup>rd</sup> place) cast down and 4s lead up. (Could have them cross and cast, then turn 1.5x, so it’s symmetrical??)</p>
+</div>
+</section>
+
+
+	
+</article>
+
+					</div>
+					
+					
+					
+					
+					
+					
+					<div class="print-card">
+						
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Faithless Nancy Dawson</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		<a href="https://www.youtube.com/watch?v=sFP_N1gaV3Y" class="dance-video-link no-print" target="_blank" rel="noopener">Video ↗</a>
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Anna Bidder</span>
+			<span class="year">(1937/1964)</span>
+			
+		</p>
+		<p class="dance-formation">duple minor longways</p>
+		<p class="dance-header-description">circular hey practice? Maybe a smidge fast.</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	<span class="tune-title">A-Rovin’</span>
+	
+	<span class="tune-detail">Traditional</span>
+	
+	
+	<span class="tune-detail">4/4</span>
+	<span class="tune-detail">D major</span>
+	
+	<span class="tune-detail">BI p. 38</span>
+	
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--0">v. easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">1s lead down, cast up to place</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">2s lead up, cast down to place</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(9-12)</span>
+					<span class="figure-description">Partners back to back</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-2)</span>
+					<span class="figure-description">Set, falling back</span>
+					<span class="figure-beats">(4)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(3-4)</span>
+					<span class="figure-description">Turn single forwards</span>
+					<span class="figure-beats">(4)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Three changes of a circular hey (PR, NL, PR)</span>
+					<span class="figure-beats">(8)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+<section class="background-section">
+	<h2>Background</h2>
+	<div><p>Some debate about the composition date of this dance: there’s a reference to three unnamed dances by Anna Bidder in a 1937 publication of <em>English Dance &amp; Song,</em> but the dance itself was not published until 1964.</p>
+</div>
+</section>
+
+
+<section class="teaching-notes-section">
+	<h2>Teaching Notes</h2>
+	<div><p>B. Prefer turn single right here</p>
+</div>
+</section>
+
+
+	
+</article>
+
+					</div>
+					
+					
+				</div>
+				
+			</div>
+
+			<!-- TABLE VIEW -->
+			<div data-print-view="table" class="print-table-view">
+				
+				
+
+<table class="program-table" aria-label="Program dance table">
+	<colgroup>
+		<col class="col-title"><col class="col-choreographer"><col class="col-year"><col class="col-formation"><col class="col-key"><col class="col-meter"><col class="col-tune"><col class="col-composer"><col class="col-source">
+	</colgroup>
+	<thead>
+		<tr>
+			<th class="col-title">Title</th><th class="col-choreographer">Choreographer</th><th class="col-year">Year</th><th class="col-formation">Formation</th><th class="col-key">Key</th><th class="col-meter">Meter</th><th class="col-tune">Tune</th><th class="col-composer">Composer</th><th class="col-source">Source</th>
+		</tr>
+	</thead>
+	
+	<tbody class="program-table-section" data-section-index="0">
+		<tr class="program-table-section-row">
+			<td colspan="9">First Half</td>
+		</tr>
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/mile-of-smiles/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Mile Of Smiles</a></td>
+			<td class="col-choreographer">Joseph Pimentel</td>
+			<td class="col-year">2012</td>
+			<td class="col-formation">duple minor longways</td>
+			<td class="col-key">C major</td>
+			<td class="col-meter">4/4</td>
+			<td class="col-tune">—</td>
+			<td class="col-composer">Dave Wiesler</td>
+			<td class="col-source">BIII p. 94</td>
+		</tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Jacks Health <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Elizabeth <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Cockle Shells <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Mais Oui <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Saint Margarets Hill <span class="missing-note">(not found)</span></td></tr>
+		
+		
+	</tbody>
+	
+	<tbody class="program-table-section" data-section-index="1">
+		<tr class="program-table-section-row">
+			<td colspan="9">Second Half</td>
+		</tr>
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Pluck Me A Fig <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Glassblowers Dream <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/childgrove/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Childgrove</a></td>
+			<td class="col-choreographer">Playford</td>
+			<td class="col-year">1701</td>
+			<td class="col-formation">duple minor longways</td>
+			<td class="col-key">D minor</td>
+			<td class="col-meter">2/2</td>
+			<td class="col-tune">—</td>
+			<td class="col-composer">—</td>
+			<td class="col-source">BI p. 20</td>
+		</tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Upon A Summers Day <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/old-wife-behind-the-fire/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Old Wife Behind the Fire</a></td>
+			<td class="col-choreographer">Neal</td>
+			<td class="col-year">1726</td>
+			<td class="col-formation">duple minor longways</td>
+			<td class="col-key">G mixolydian</td>
+			<td class="col-meter">4/4</td>
+			<td class="col-tune">—</td>
+			<td class="col-composer">—</td>
+			<td class="col-source">BII p. 97</td>
+		</tr>
+		
+		
+	</tbody>
+	
+	<tbody class="program-table-section" data-section-index="2">
+		<tr class="program-table-section-row">
+			<td colspan="9">Alternates</td>
+		</tr>
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Domino Five <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/alice/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Alice</a></td>
+			<td class="col-choreographer">Philippe Callens</td>
+			<td class="col-year">2002</td>
+			<td class="col-formation">duple minor longways</td>
+			<td class="col-key">A major</td>
+			<td class="col-meter">3/4</td>
+			<td class="col-tune">Siciliano</td>
+			<td class="col-composer">Georg Telemann</td>
+			<td class="col-source">BII p. 3</td>
+		</tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Lilliburlero <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/mendocino-redwood/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Mendocino Redwood</a></td>
+			<td class="col-choreographer">Mary Devlin, Bob Fraley, Elizabeth Zekley</td>
+			<td class="col-year">2005</td>
+			<td class="col-formation">duple minor longways</td>
+			<td class="col-key">D minor</td>
+			<td class="col-meter">6/8</td>
+			<td class="col-tune">Woodlands Walk</td>
+			<td class="col-composer">Jonathan Jensen</td>
+			<td class="col-source">BIII p. 92</td>
+		</tr>
+		
+		
+		
+		
+		
+		<tr class="program-table-missing"><td colspan="9">Chocolate Equation <span class="missing-note">(not found)</span></td></tr>
+		
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/peridot-ring/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Peridot Ring</a></td>
+			<td class="col-choreographer">Susan Kevra</td>
+			<td class="col-year">2017</td>
+			<td class="col-formation">3-couple longways</td>
+			<td class="col-key">C major</td>
+			<td class="col-meter">2/2</td>
+			<td class="col-tune">—</td>
+			<td class="col-composer">Rachel Bell</td>
+			<td class="col-source">BIII p. 109</td>
+		</tr>
+		
+		
+		
+		
+		
+		
+		
+		<tr>
+			<td class="col-title"><a href="/dances/faithless-nancy-dawson/?from_program=jp-ecd-7-14-2026&amp;from_title=JP%20ECD&amp;from_date=July%2014%2C%202026">Faithless Nancy Dawson</a></td>
+			<td class="col-choreographer">Anna Bidder</td>
+			<td class="col-year">1937/1964</td>
+			<td class="col-formation">duple minor longways</td>
+			<td class="col-key">D major</td>
+			<td class="col-meter">4/4</td>
+			<td class="col-tune">A-Rovin’</td>
+			<td class="col-composer">Traditional</td>
+			<td class="col-source">BI p. 38</td>
+		</tr>
+		
+		
+	</tbody>
+	
+</table>
+
+			</div>
+
+		</div>
+	</main>
+</div>
+
+
+<script>window.PagedConfig = { auto: false };</script>
+<script src="/static/js/paged.polyfill.min.js"></script>
+<script src="/static/js/program-print.js" type="module"></script>
+</body>
+</html>

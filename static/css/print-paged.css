@@ -1,0 +1,411 @@
+/* ============================================================
+   print-paged.css — content styles for the Paged.js program
+   print preview.
+
+   This stylesheet is NOT linked in the document <head>; it is
+   handed to Paged.js's polisher via Previewer.preview(). Paged.js
+   applies it to the paginated `.pagedjs_page` boxes it renders, so
+   the on-screen preview and the printed output are styled by the
+   exact same rules — what you see is what prints.
+
+   Everything is scoped under `.pagedjs_page` so it only touches the
+   rendered pages, never the settings sidebar around them. Values are
+   self-contained (explicit pt/rem, no theme custom properties) so the
+   layout is deterministic regardless of which `:root` vars resolve.
+
+   TEXT SCALE: every font-size (and the text-anchored grid/indent
+   widths) is written as `calc(<value> * var(--text-scale, 1))`. The
+   controller sets --text-scale on .pagedjs_page from the sidebar's
+   text-size select, so pagination re-flows at the chosen size. Any
+   new font-size added here must follow the same pattern or it won't
+   respond to the control.
+   ============================================================ */
+
+/* ── Page-box base typography ── */
+.pagedjs_page {
+	--text-scale: 1;
+	font-family: Georgia, 'Times New Roman', serif;
+	font-size: calc(10pt * var(--text-scale, 1));
+	line-height: 1.4;
+	color: #000;
+}
+
+.pagedjs_page a { color: #000; text-decoration: none; }
+
+/* Page breaks must be UNSCOPED (no .pagedjs_page prefix): Paged.js's Breaks
+   handler resolves break-before/after against the source content before
+   pagination — and only from stylesheet rules, never inline styles. The
+   controller adds `.print-card--break` to each card that should start a new
+   page (every card except a leading one). A forced break on the very first
+   flow element is dropped by Paged.js, so the table view can always carry it. */
+.print-card--break { break-before: page; }
+.print-table-view { break-before: page; }
+
+.pagedjs_page .no-print { display: none !important; }
+
+/* ── Dance card shell ── */
+.pagedjs_page .dance-card {
+	max-width: none;
+	margin: 0;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	background: #fff;
+}
+
+.pagedjs_page .dance-card section {
+	margin-bottom: 12pt;
+}
+
+.pagedjs_page .dance-header {
+	margin-bottom: 12pt;
+	padding-bottom: 8pt;
+	border-bottom: 1.5pt solid #000;
+}
+
+.pagedjs_page .dance-header-top {
+	display: flex;
+	align-items: baseline;
+	gap: 10pt;
+	flex-wrap: wrap;
+}
+
+.pagedjs_page .dance-title {
+	font-size: calc(18pt * var(--text-scale, 1));
+	font-weight: bold;
+	margin: 0;
+	line-height: 1.2;
+}
+
+.pagedjs_page .dance-alternate-title {
+	font-size: calc(11pt * var(--text-scale, 1));
+	font-style: italic;
+	color: #333;
+	margin: 2pt 0 0;
+}
+
+.pagedjs_page .dance-alternate-title-title {
+	font-style: normal;
+	font-weight: bold;
+	color: #000;
+}
+
+.pagedjs_page .dance-type-badge {
+	font-size: calc(8pt * var(--text-scale, 1));
+	font-weight: bold;
+	padding: 1pt 5pt;
+	border: 1pt solid #000;
+	border-radius: 999pt;
+	background: none !important;
+	color: #000 !important;
+	text-transform: lowercase;
+	letter-spacing: 0.03em;
+	white-space: nowrap;
+}
+
+.pagedjs_page .dance-meta,
+.pagedjs_page .dance-formation {
+	font-size: calc(9pt * var(--text-scale, 1));
+	color: #333;
+	margin: 4pt 0 0;
+}
+
+.pagedjs_page .dance-meta .author { margin-right: 4pt; }
+.pagedjs_page .dance-meta .year { margin-right: 4pt; }
+.pagedjs_page .dance-formation .formation-note { font-style: italic; }
+
+/* ── Section headings inside cards ── */
+.pagedjs_page .dance-card h2 {
+	font-size: calc(7.5pt * var(--text-scale, 1));
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: #444;
+	border-bottom: 0.5pt solid #aaa;
+	padding-bottom: 2pt;
+	margin-top: 14pt;
+	margin-bottom: 6pt;
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ── Tunes ── */
+.pagedjs_page .tune-inline {
+	font-size: calc(9pt * var(--text-scale, 1));
+	color: #333;
+	margin: 4pt 0 0;
+}
+
+.pagedjs_page .tune-title { font-style: italic; color: #000; }
+.pagedjs_page .tune-detail::before { content: " · "; color: #777; }
+.pagedjs_page .tune-detail:first-child::before { content: none; }
+
+.pagedjs_page .tunes-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: calc(9pt * var(--text-scale, 1));
+}
+
+.pagedjs_page .tunes-table th {
+	font-weight: bold;
+	padding: 2pt 4pt;
+	border-bottom: 0.75pt solid #000;
+	text-align: left;
+}
+
+.pagedjs_page .tunes-table td {
+	padding: 2pt 4pt;
+	vertical-align: top;
+}
+
+.pagedjs_page .tunes-table tbody tr:nth-child(even) { background: none; }
+
+/* ── Choreography ── */
+.pagedjs_page .choreo-sections {
+	display: flex;
+	flex-direction: column;
+	gap: 6pt;
+}
+
+.pagedjs_page .choreo-section {
+	display: grid;
+	grid-template-columns: calc(3rem * var(--text-scale, 1)) 1fr;
+	gap: 0 6pt;
+	align-items: baseline;
+	break-inside: avoid;
+}
+
+.pagedjs_page .section-label {
+	font-size: calc(8pt * var(--text-scale, 1));
+	font-variant: small-caps;
+	font-weight: bold;
+	letter-spacing: 0.06em;
+	color: #333;
+	margin: 0;
+	white-space: nowrap;
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+.pagedjs_page .section-description {
+	font-size: calc(10pt * var(--text-scale, 1));
+	margin: 0;
+	line-height: 1.4;
+}
+
+.pagedjs_page .figure-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2pt;
+}
+
+.pagedjs_page .figure {
+	display: grid;
+	grid-template-columns: calc(2.75rem * var(--text-scale, 1)) 1fr calc(2.25rem * var(--text-scale, 1));
+	align-items: baseline;
+	gap: 6pt;
+}
+
+.pagedjs_page .figure-description {
+	font-size: calc(10pt * var(--text-scale, 1));
+	line-height: 1.4;
+}
+
+.pagedjs_page .figure-bars,
+.pagedjs_page .figure-beats {
+	font-size: calc(8.5pt * var(--text-scale, 1));
+	color: #555;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* ── Background + teaching notes ── */
+.pagedjs_page .teaching-notes-section,
+.pagedjs_page .background-section { hyphens: auto; }
+
+.pagedjs_page .teaching-notes-section { break-inside: avoid; }
+
+.pagedjs_page .teaching-notes-section p,
+.pagedjs_page .background-section p,
+.pagedjs_page .teaching-notes-section li,
+.pagedjs_page .background-section li {
+	font-size: calc(9pt * var(--text-scale, 1));
+	color: #333;
+	margin: 0 0 5pt;
+}
+
+.pagedjs_page .teaching-notes-section p:last-child,
+.pagedjs_page .background-section p:last-child { margin-bottom: 0; }
+
+.pagedjs_page .teaching-notes-section ul,
+.pagedjs_page .teaching-notes-section ol,
+.pagedjs_page .background-section ul,
+.pagedjs_page .background-section ol {
+	padding-left: calc(1.25rem * var(--text-scale, 1));
+	margin: 0 0 5pt;
+}
+
+.pagedjs_page .teaching-notes-section blockquote,
+.pagedjs_page .background-section blockquote {
+	font-style: italic;
+	border-left: 0.5pt solid #aaa;
+	margin: 3pt 0 3pt 12pt;
+	padding-left: 8pt;
+}
+
+.pagedjs_page .teaching-notes-section blockquote p,
+.pagedjs_page .background-section blockquote p { margin-bottom: 2pt; }
+
+.pagedjs_page p,
+.pagedjs_page li { widows: 2; orphans: 2; }
+
+/* ── Program TOC (table of contents view) ── */
+.pagedjs_page .print-program-header {
+	margin-bottom: 18pt;
+	padding-bottom: 8pt;
+	border-bottom: 1.5pt solid #000;
+}
+
+.pagedjs_page .program-title {
+	font-size: calc(20pt * var(--text-scale, 1));
+	font-weight: bold;
+	margin: 0 0 4pt;
+}
+
+.pagedjs_page .program-meta {
+	font-size: calc(10pt * var(--text-scale, 1));
+	color: #333;
+	margin: 0;
+}
+
+.pagedjs_page .program-section-label {
+	font-size: calc(7.5pt * var(--text-scale, 1));
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: #444;
+	border-bottom: 0.5pt solid #aaa;
+	padding-bottom: 2pt;
+	margin: 14pt 0 5pt;
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+.pagedjs_page .program-dance-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+/* Counter rules must be UNSCOPED (no .pagedjs_page prefix): Paged.js's
+   Counters handler resolves counter-increment/reset against the source
+   content before pagination, when no .pagedjs_page ancestor exists yet.
+   Scoping them would match nothing and the counter would stay 0. */
+.program-dance-list { counter-reset: program-dance; }
+.program-dance-item { counter-increment: program-dance; }
+
+.pagedjs_page .program-dance-item {
+	display: grid;
+	grid-template-columns: calc(1.5rem * var(--text-scale, 1)) 1fr;
+	gap: 0 6pt;
+	background: none;
+	border: none;
+	box-shadow: none;
+	padding: 2pt 0;
+	break-inside: avoid;
+}
+
+.pagedjs_page .program-dance-item::before {
+	content: counter(program-dance) ".";
+	font-size: calc(9pt * var(--text-scale, 1));
+	color: #555;
+	align-self: start;
+}
+
+.pagedjs_page .program-dance-main {
+	display: flex;
+	align-items: baseline;
+	gap: 6pt;
+}
+
+.pagedjs_page .program-dance-link {
+	font-size: calc(10pt * var(--text-scale, 1));
+	font-weight: normal;
+	color: #000;
+	flex: 1;
+}
+
+.pagedjs_page .program-dance-author {
+	font-size: calc(8.5pt * var(--text-scale, 1));
+	color: #555;
+}
+
+.pagedjs_page .program-dance-note {
+	font-size: calc(8.5pt * var(--text-scale, 1));
+	color: #555;
+	font-style: italic;
+	grid-column: 2;
+}
+
+/* ── Program table view ── */
+.pagedjs_page .program-table {
+	font-size: calc(7pt * var(--text-scale, 1));
+	table-layout: fixed;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.pagedjs_page .program-table th,
+.pagedjs_page .program-table td {
+	padding: 2pt 3pt;
+	border: 0.5pt solid #999;
+	text-align: left;
+	vertical-align: top;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pagedjs_page .program-table th {
+	font-size: calc(6pt * var(--text-scale, 1));
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	white-space: nowrap;
+}
+
+/* Columns allowed to wrap rather than truncate. Cells are addressed by
+   their col-{key} class (stamped by program-table-core.njk) rather than
+   position, so the rules survive the preview removing unchecked columns. */
+.pagedjs_page .program-table td.col-title,
+.pagedjs_page .program-table td.col-choreographer,
+.pagedjs_page .program-table td.col-formation,
+.pagedjs_page .program-table td.col-tune,
+.pagedjs_page .program-table td.col-composer {
+	white-space: normal;
+	overflow-wrap: break-word;
+	word-break: break-word;
+}
+
+.pagedjs_page .program-table col.col-title         { width: 16%; }
+.pagedjs_page .program-table col.col-choreographer { width: 14%; }
+.pagedjs_page .program-table col.col-year          { width: 5%; }
+.pagedjs_page .program-table col.col-formation     { width: 14%; }
+.pagedjs_page .program-table col.col-key           { width: 11%; }
+.pagedjs_page .program-table col.col-meter         { width: 5%; }
+.pagedjs_page .program-table col.col-tune          { width: 14%; }
+.pagedjs_page .program-table col.col-composer      { width: 13%; }
+.pagedjs_page .program-table col.col-source        { width: 8%; }
+
+.pagedjs_page .program-table-section-row td {
+	font-weight: bold;
+	background: #f0f0f0;
+	border-top: 1pt solid #000;
+	white-space: normal;
+}
+
+.pagedjs_page .program-table-missing td {
+	color: #777;
+	font-style: italic;
+	white-space: normal;
+}

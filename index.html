@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>All Dances</title>
+	
+	
+
+	
+	<link rel="stylesheet" href="/bundle/q4uNGl1bcY.css">
+	<script>window.PATH_PREFIX = "/";</script>
+</head>
+<body>
+	<nav class="site-nav no-print">
+		<a href="/" class="site-title"></a>
+		<div class="site-nav-links">
+			<a href="/" class="site-nav-link">Dances</a>
+			<a href="/programs/" class="site-nav-link">Programs</a>
+		</div>
+	</nav>
+	<main>
+		
+
+
+
+<div class="index-page" x-data="danceFilter()">
+	<h1>Choreodex</h1>
+	<p class="subtitle"></p>
+
+	<div class="filter-section no-print">
+		<div class="filter-bar">
+			<span class="filter-label">Type</span>
+			<button class="filter-btn" @click="typeFilter = 'all'" :class="{ active: typeFilter === 'all' }">All</button>
+			<button class="filter-btn" @click="typeFilter = 'contra'" :class="{ active: typeFilter === 'contra' }">Contra</button>
+			<button class="filter-btn" @click="typeFilter = 'english'" :class="{ active: typeFilter === 'english' }">English</button>
+			<button class="filter-btn" @click="typeFilter = 'square'" :class="{ active: typeFilter === 'square' }">Square</button>
+			<button class="filter-btn" @click="typeFilter = 'chestnut'" :class="{ active: typeFilter === 'chestnut' }">Chestnut</button>
+			<label class="type-pill-toggle">
+				<input type="checkbox" x-model="showTypePills">
+				Show type pills
+			</label>
+		</div>
+
+		<div class="filter-search-grid">
+			<div class="filter-field">
+				<label class="filter-field-label" for="filter-title">Title</label>
+				<input id="filter-title" class="filter-input" type="search" placeholder="Search titles…" x-model="titleQuery">
+			</div>
+			<div class="filter-field">
+				<label class="filter-field-label" for="filter-author">Choreographer</label>
+				<input id="filter-author" class="filter-input" type="search" placeholder="Author or interpreter…" x-model="authorQuery">
+			</div>
+			<div class="filter-field">
+				<label class="filter-field-label" for="filter-formation">Formation</label>
+				<select id="filter-formation" class="filter-input" x-model="formationFilter">
+					<option value="">All formations</option>
+					
+					
+					<option value="2-couple">2-couple</option>
+					
+					<option value="3-couple longways">3-couple longways</option>
+					
+					<option value="3C">3C</option>
+					
+					<option value="3C mixer">3C mixer</option>
+					
+					<option value="TODO">TODO</option>
+					
+					<option value="duple minor longways">duple minor longways</option>
+					
+					<option value="four couple set">four couple set</option>
+					
+					<option value="improper duple longways">improper duple longways</option>
+					
+					<option value="proper duple longways">proper duple longways</option>
+					
+					<option value="triple minor longways">triple minor longways</option>
+					
+				</select>
+			</div>
+			<div class="filter-field">
+				<label class="filter-field-label" for="filter-difficulty">Difficulty</label>
+				<select id="filter-difficulty" class="filter-input" x-model="difficultyFilter">
+					<option value="">All difficulties</option>
+					
+					
+					<option value="0">v. easy</option>
+					
+					<option value="1">easy</option>
+					
+					<option value="2">mod.</option>
+					
+					<option value="3">hard</option>
+					
+				</select>
+			</div>
+			<div class="filter-field">
+				<label class="filter-field-label" for="filter-choreo">Choreography</label>
+				<input id="filter-choreo" class="filter-input" type="search" placeholder="Search choreography…" x-model="choreoQuery">
+				<span class="choreo-status" x-show="choreoLoading" x-cloak="">Searching…</span>
+				<span class="choreo-status" x-show="choreoUnavailable" x-cloak="">Requires a production build.</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="result-bar">
+		<p class="result-count" x-cloak="" x-text="visibleCount < totalCount ? visibleCount + ' of ' + totalCount + ' dances' : totalCount + ' dances'"></p>
+		
+		<button type="button" class="text-btn no-print" @click="toggleAllDescriptions()">
+			<span x-text="allExpanded ? 'Collapse all' : 'Expand all'">Expand all</span>
+		</button>
+		
+	</div>
+
+	<ul class="dance-list" id="dance-list" :class="{ 'hide-type-pills': !showTypePills }">
+		
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="alice" data-author="Philippe Callens" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/alice/">Alice</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Philippe Callens</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">graceful waltz dance, accessible, low on Figures(tm)</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="3C mixer" data-difficulty="0" data-slug="ashford-anniversary" data-author="Charles Bolton" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/ashford-anniversary/">Ashford Anniversary</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Charles Bolton</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">cute low-stakes mixer</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="1" data-slug="atossas-gift" data-author="Scott Higgs" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/atossas-gift/">Atossa’s Gift</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Scott Higgs</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">mostly glossary, incl. box the gnat and fractional star</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="2" data-slug="barbarinis-tambourine" data-author="Walsh" data-interpreted-by="Jacqueline Schwab">
+			
+			<a class="dance-link" href="/dances/barbarinis-tambourine/">Barbarini’s Tambourine</a>
+			<span class="difficulty-badge difficulty--2">mod.</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Walsh</span>
+			
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="TODO" data-difficulty="1" data-slug="bishop" data-author="TODO" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/bishop/">Bishop, The</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">TODO</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">easyish triple minor</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="1" data-slug="candles-in-the-dark" data-author="Loretta Holz" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/candles-in-the-dark/">Candles in the Dark</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Loretta Holz</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">a fave; assisted figure-8s.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="1" data-slug="childgrove" data-author="Playford" data-interpreted-by="Cecil Sharp" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/childgrove/">Childgrove</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">siding, full fig 8. Different speeds of 2HT.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="1" data-slug="corellis-maggot" data-author="Cathy &amp; John Miller" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/corellis-maggot/">Corelli’s Maggot</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Cathy & John Miller</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">introduce gates, out-of-set interaction</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="3C" data-difficulty="0" data-slug="eastborne-rover" data-author="Ken Prigmore" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/eastborne-rover/">Eastborne Rover</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Ken Prigmore</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">accessible and figure-light 3C (mostly only Figure(tm) is a poussette)</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="eubie-good-simpler-version" data-author="Susan Kevra" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/eubie-good-simpler-version/">Eubie Good (simpler version)</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Susan Kevra</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">half fig 8s, Rs & Ls, circles and back to backs.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="faithless-nancy-dawson" data-author="Anna Bidder" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/faithless-nancy-dawson/">Faithless Nancy Dawson</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Anna Bidder</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">circular hey practice? Maybe a smidge fast.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="farmers-joy" data-author="Joseph Pimentel" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/farmers-joy/">The Farmer’s Joy</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Joseph Pimentel</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">sorta kinda half fig-8 practice, mostly just delightful</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="1" data-slug="first-of-october" data-author="Phillipe Callens" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/first-of-october/">First of October, The</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Phillipe Callens</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">practice full figure 8s</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="fourpence-hapenny-farthing" data-author="Playford" data-interpreted-by="Cecil J. Sharp, ed. H. E. Styles" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/fourpence-hapenny-farthing/">Fourpence, Ha’penny, Farthing</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">drill corners and half fig-8s</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="geud-man-of-ballangigh" data-author="Playford" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/geud-man-of-ballangigh/">The Geud Man of Ballangigh</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">leading between and casting, set and turn single. Easy peasy.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="highland-farewell" data-author="Pat Petersen" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/highland-farewell/">Highland Farewell</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Pat Petersen</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">half fig-8, Rs & Ls</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="hole-in-the-wall" data-author="Playford" data-interpreted-by="Douglas &amp; Helen Kennedy" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/hole-in-the-wall/">The Hole In The Wall</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">casting, leading, changing, circling. Hole-in-the-wall cross maybe be a simple lonnng change. PHRASING PRACTICE?</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="hop-ground" data-author="Preston" data-interpreted-by="Bert Simons" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/hop-ground/">Hop Ground, The</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Preston</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">a slightly different take on setting (2 v 1); Rs & Ls.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="indian-queen-alt" data-author="Playford" data-interpreted-by="Cecil Sharp" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/indian-queen-alt/">Indian Queen (MM Var.)</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">simple glossary; corners, stars, back to back etc.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="1" data-slug="jacks-maggot" data-author="Playford" data-interpreted-by="Cecil Sharp" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/jacks-maggot/">Jack’s Maggot</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">practice heys for 3</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="four couple set" data-difficulty="0" data-slug="jamaica" data-author="Playford" data-interpreted-by="Tom Cook" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/jamaica/">Jamaica</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">some interesting set geography</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="triple minor longways" data-difficulty="1" data-slug="key-to-the-cellar" data-author="Jenny Beer" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/key-to-the-cellar/">Key To The Cellar</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Jenny Beer</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">tricky bit is the heys for 3</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="1" data-slug="knives-and-forks" data-author="Neal" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/knives-and-forks/">Knives and Forks</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Neal</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">figures are very simple but the tune is FUNKY. Maybe good to practice counting weird time sigs?</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="knole-park" data-author="Voight" data-interpreted-by="A. Simons" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/knole-park/">Knole Park</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Voight</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">corner geography?? but piece-y, odd momentum changes.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="3C" data-difficulty="0" data-slug="leahs-waltz" data-author="Fried de Metz Herman" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/leahs-waltz/">Leah’s Waltz</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Fried de Metz Herman</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">practice waltz time / 3C geography. (Probably slightly harder than the ideal triple minor intro tho.)</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="lord-foppington" data-author="Dancing Master" data-interpreted-by="Fried de Metz Herman" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/lord-foppington/">Lord Foppington</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Dancing Master</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">great half fig-8 intro</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="mendocino-redwood" data-author="Mary Devlin, Bob Fraley, Elizabeth Zekley" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/mendocino-redwood/">Mendocino Redwood</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Mary Devlin, Bob Fraley, Elizabeth Zekley</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">half fig-8 practice, diags. vs corners, stars.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="3" data-slug="michael-and-all-angels" data-author="Fried de Metz Herman" data-interpreted-by="">
+			
+			<a class="dance-link" href="/dances/michael-and-all-angels/">Michael and All Angels</a>
+			<span class="difficulty-badge difficulty--3">hard</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Fried de Metz Herman</span>
+			
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="2" data-slug="michedonia" data-author="Dan Blim" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/michedonia/">Michedonia</a>
+			<span class="difficulty-badge difficulty--2">mod.</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Dan Blim</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">classic banger; simple figures but piece-y and fast</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="midnight-ramble" data-author="Thompson" data-interpreted-by="George Fogg" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/midnight-ramble/">Midnight Ramble</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Thompson</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">½ fig 8 and Rs/Ls; clapping adds a little zing to glossary stuff</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="1" data-slug="mile-of-smiles" data-author="Joseph Pimentel" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/mile-of-smiles/">Mile Of Smiles</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Joseph Pimentel</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">standard A part with a chase in the B, still mostly glossary moves.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="minor-spaniard" data-author="Jenny Beer" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/minor-spaniard/">The Minor Spaniard</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Jenny Beer</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">dead simple moves with interesting recombinations</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="mock-hobby-horse" data-author="Playford" data-interpreted-by="Cecil Sharp" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/mock-hobby-horse/">Mock Hobby-Horse</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">corners and files set geography, different lengths of 2HT</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="mole-in-the-hall" data-author="Maia McCormick" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/mole-in-the-hall/">Mole in the Hall</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Maia McCormick</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">the glossary-est dance that ever glossaried. Cast, lead, turn single, set, 2ht</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="chestnut" data-formation="triple minor longways" data-difficulty="2" data-slug="money-musk" data-author="Traditional" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/money-musk/">Money Musk</a>
+			<span class="difficulty-badge difficulty--2">mod.</span>
+			<span class="dance-type-badge dance-type--chestnut">chestnut</span>
+			
+			<span class="dance-author">Traditional</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">beloved chestnut <3</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="mulberry-garden" data-author="Playford" data-interpreted-by="Cecil Sharp" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/mulberry-garden/">Mulberry Garden, The</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">glossary: up and double and falling back, back to back, bast and lead. BUT orientation might be hard!!</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="new-long-room-at-scarborough" data-author="Johnson" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/new-long-room-at-scarborough/">New Long Room at Scarborough</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Johnson</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">slipjig, casts and leads and sets plus Rs and Ls</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="old-wife-behind-the-fire" data-author="Neal" data-interpreted-by="Fogg/Jackson" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/old-wife-behind-the-fire/">Old Wife Behind the Fire</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Neal</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">glossary (set, cast, lines of 4, Rs and Ls)</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="improper duple longways" data-difficulty="1" data-slug="passages" data-author="Kalia Kilban" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/passages/">Passages</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Kalia Kilban</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">waltz time, easy figures but a little piece-y</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="3-couple longways" data-difficulty="0" data-slug="peridot-ring" data-author="Susan Kevra" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/peridot-ring/">Peridot Ring</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Susan Kevra</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">practice swirly siding, meanwhiles, your position in a 3C.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="3C" data-difficulty="0" data-slug="physical-snob" data-author="Unknown" data-interpreted-by="Bernard Bentley" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/physical-snob/">Physical Snob, The</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Unknown</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">poussettes and R vs. L file practice; dead easy.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="3-couple longways" data-difficulty="3" data-slug="prince-william" data-author="Walsh" data-interpreted-by="Pat Shaw">
+			
+			<a class="dance-link" href="/dances/prince-william/">Prince William</a>
+			<span class="difficulty-badge difficulty--3">hard</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Walsh</span>
+			
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="rakes-of-rochester" data-author="Bernard Bentley" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/rakes-of-rochester/">Rakes of Rochester</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Bernard Bentley</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">hand-turn and/or  R/L practice</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="0" data-slug="ransom-note" data-author="Susan Kevra" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/ransom-note/">Ransom Note</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Susan Kevra</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">glossary: lead, cast, 2HT, fall back, back to back, set</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="2-couple" data-difficulty="0" data-slug="rufty-tufty" data-author="Playford" data-interpreted-by="Cecil Sharp" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/rufty-tufty/">Rufty Tufty</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Playford</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">dead simple, kind of boring, also somehow harder than it should be</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="2" data-slug="sapphire-sea" data-author="Christine Robb" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/sapphire-sea/">Sapphire Sea</a>
+			<span class="difficulty-badge difficulty--2">mod.</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Christine Robb</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">a fave! Dolphin hey.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="2" data-slug="softly-good-tummas" data-author="Nathaniel Kynaston" data-interpreted-by="Andrew Shaw">
+			
+			<a class="dance-link" href="/dances/softly-good-tummas/">Softly Good Tummas</a>
+			<span class="difficulty-badge difficulty--2">mod.</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Nathaniel Kynaston</span>
+			
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="proper duple longways" data-difficulty="1" data-slug="sunlight-through-draperies" data-author="Tom Roby" data-interpreted-by="" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/sunlight-through-draperies/">Sunlight Through Draperies</a>
+			<span class="difficulty-badge difficulty--1">easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Tom Roby</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">simple figures but some interesting recombinations, could be good practice for piece-y/odd phrasing.</p>
+			
+		</li>
+		
+		<li class="dance-item" data-dance-type="english" data-formation="duple minor longways" data-difficulty="0" data-slug="take-a-dance" data-author="Johnson" data-interpreted-by="Rich Jackson &amp; George Fogg" x-data="{ expanded: false }" @dance-set-expanded.window="expanded = $event.detail">
+			
+			<button type="button" class="dance-toggle no-print" @click="expanded = !expanded" :aria-expanded="expanded.toString()" :class="{ 'dance-toggle--expanded': expanded }" aria-label="Toggle description">
+				<svg class="dance-toggle-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2l5 4-5 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+			</button>
+			
+			<a class="dance-link" href="/dances/take-a-dance/">Take A Dance</a>
+			<span class="difficulty-badge difficulty--0">v. easy</span>
+			<span class="dance-type-badge dance-type--english">english</span>
+			
+			<span class="dance-author">Johnson</span>
+			
+			
+			<p class="dance-description" x-show="expanded" x-cloak="">leading, casting, half fig-8 and R/Ls</p>
+			
+		</li>
+		
+	</ul>
+
+	<p class="empty-state" x-show="visibleCount === 0" x-cloak="">No dances match these filters.</p>
+</div>
+<script defer="" src="/static/js/filter.js"></script>
+<script defer="" src="/static/js/alpine.min.js"></script>
+
+	</main>
+</body>
+</html>

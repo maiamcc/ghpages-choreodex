@@ -1,0 +1,802 @@
+/* ============================================================
+	 listing-styles.njk — shared styles for dance/program list pages
+	 ============================================================ */
+
+.index-page {
+	max-width: var(--max-content);
+	margin: 0 auto;
+}
+
+.index-page h1 {
+	font-size: var(--text-2xl);
+	margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+	color: var(--color-text-muted);
+	margin-bottom: var(--space-xl);
+}
+
+.dance-list {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-xs);
+}
+
+.dance-item {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--space-xs) var(--space-sm);
+	padding: var(--space-sm) var(--space-md);
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	box-shadow: var(--shadow-subtle);
+	transition: border-color 0.15s;
+}
+
+.dance-item:hover {
+	border-color: var(--color-accent);
+}
+
+.dance-link {
+	font-weight: 600;
+	text-decoration: none;
+	flex: 1;
+	color: var(--color-text);
+}
+
+.dance-link:hover {
+	color: var(--color-accent);
+}
+
+.dance-author {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+}
+
+.dance-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.1rem;
+	height: 1.1rem;
+	padding: 0;
+	border: none;
+	background: none;
+	color: var(--color-text-muted);
+	cursor: pointer;
+	flex-shrink: 0;
+	border-radius: var(--radius-sm);
+}
+
+.dance-toggle:hover {
+	color: var(--color-accent);
+}
+
+.dance-toggle-icon {
+	width: 9px;
+	height: 9px;
+	transition: transform 0.15s;
+}
+
+.dance-toggle--expanded .dance-toggle-icon {
+	transform: rotate(90deg);
+}
+
+.dance-description {
+	flex-basis: 100%;
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	margin: 0;
+	padding-left: calc(1.1rem + var(--space-sm));
+}
+/* ============================================================
+	 index.njk — filter bar (dances-only)
+	 ============================================================ */
+
+[x-cloak] { display: none !important; }
+
+.filter-section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-md);
+	padding-bottom: var(--space-lg);
+	margin-bottom: var(--space-lg);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.filter-bar {
+	display: flex;
+	align-items: center;
+	gap: var(--space-sm);
+	flex-wrap: wrap;
+}
+
+.filter-label {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	white-space: nowrap;
+}
+
+.filter-btn {
+	font-size: var(--text-sm);
+	font-family: inherit;
+	font-weight: 500;
+	padding: var(--space-xs) var(--space-md);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-pill);
+	background: var(--color-surface);
+	color: var(--color-text-muted);
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.filter-btn:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+.filter-btn.active {
+	background: var(--color-accent);
+	border-color: var(--color-accent);
+	color: #fff;
+}
+
+.type-pill-toggle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: auto;
+	font-size: var(--text-sm);
+	font-weight: 500;
+	color: var(--color-text-muted);
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.type-pill-toggle input {
+	cursor: pointer;
+}
+
+.hide-type-pills .dance-type-badge {
+	display: none;
+}
+
+.filter-search-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+	gap: var(--space-sm) var(--space-md);
+}
+
+.filter-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.filter-field-label {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.filter-input {
+	font-size: var(--text-sm);
+	font-family: inherit;
+	padding: var(--space-xs) var(--space-md);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-pill);
+	background: var(--color-surface);
+	color: var(--color-text);
+	width: 100%;
+	transition: border-color 0.15s;
+}
+
+.filter-input:focus {
+	outline: none;
+	border-color: var(--color-accent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+select.filter-input {
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	padding-right: calc(var(--space-md) + 1.25rem);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right var(--space-md) center;
+}
+
+.choreo-status {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	font-style: italic;
+	padding-left: var(--space-md);
+}
+
+.result-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-sm);
+	margin-bottom: var(--space-sm);
+}
+
+.result-count {
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	margin: 0;
+}
+
+.text-btn {
+	font-size: var(--text-sm);
+	font-family: inherit;
+	font-weight: 600;
+	color: var(--color-accent);
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.text-btn:hover {
+	text-decoration: underline;
+}
+
+.empty-state {
+	text-align: center;
+	color: var(--color-text-muted);
+	padding: var(--space-xl) 0;
+}
+/* ============================================================
+	 base.njk — custom properties, reset, site shell, utilities
+	 ============================================================ */
+
+:root {
+	--color-contra: #3b6fce;
+	--color-english: #2e8b57;
+	--color-square: #c07a2a;
+	--color-chestnut: #954535;
+
+	--color-difficulty-0: #6b8f5e;
+	--color-difficulty-1: #b89a3a;
+	--color-difficulty-2: #b3703f;
+	--color-difficulty-3: #a5504a;
+
+	--color-bg: #fafaf8;
+	--color-surface: #ffffff;
+	--color-border: #ddd;
+	--color-text: #1a1a1a;
+	--color-text-muted: #5a5a5a;
+	--color-accent: #3b6fce;
+	--color-nav-bg: #f0ede8;
+
+	--space-xs: 0.25rem;
+	--space-sm: 0.5rem;
+	--space-md: 1rem;
+	--space-lg: 1.5rem;
+	--space-xl: 2rem;
+	--space-2xl: 3rem;
+
+	--text-sm: 0.8125rem;
+	--text-base: 1rem;
+	--text-md: 1.125rem;
+	--text-lg: 1.375rem;
+	--text-xl: 1.75rem;
+	--text-2xl: 2.25rem;
+
+	--radius-sm: 3px;
+	--radius-pill: 999px;
+	--max-content: 680px;
+	--shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+html {
+	font-size: 16px;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-size: var(--text-base);
+	line-height: 1.6;
+	text-rendering: optimizeLegibility;
+	font-kerning: normal;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin-top: 0;
+	margin-bottom: var(--space-sm);
+	line-height: 1.25;
+}
+
+p {
+	margin-top: 0;
+	margin-bottom: var(--space-md);
+}
+
+a {
+	color: var(--color-accent);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+}
+
+.site-nav {
+	background: var(--color-nav-bg);
+	border-bottom: 1px solid var(--color-border);
+	padding: var(--space-sm) var(--space-lg);
+	display: flex;
+	align-items: center;
+	gap: var(--space-lg);
+}
+
+.site-title {
+	font-size: var(--text-md);
+	font-weight: 700;
+	text-decoration: none;
+	color: var(--color-text);
+	letter-spacing: 0.01em;
+}
+
+.site-title:hover {
+	color: var(--color-accent);
+}
+
+.site-nav-links {
+	display: flex;
+	gap: var(--space-md);
+}
+
+.site-nav-link {
+	font-size: var(--text-sm);
+	font-weight: 500;
+	color: var(--color-text-muted);
+	text-decoration: none;
+}
+
+.site-nav-link:hover {
+	color: var(--color-accent);
+}
+
+main {
+	max-width: calc(var(--max-content) + var(--space-xl) * 2);
+	margin: 0 auto;
+	padding: var(--space-xl) var(--space-lg);
+}
+
+.dance-type-badge {
+	display: inline-block;
+	font-size: var(--text-sm);
+	font-weight: 600;
+	padding: 2px var(--space-sm);
+	border-radius: var(--radius-pill);
+	text-transform: lowercase;
+	letter-spacing: 0.03em;
+	vertical-align: middle;
+	white-space: nowrap;
+	color: #fff;
+}
+
+.dance-type--contra { background-color: var(--color-contra); }
+.dance-type--english { background-color: var(--color-english); }
+.dance-type--square { background-color: var(--color-square); }
+.dance-type--chestnut { background-color: var(--color-chestnut); }
+
+.difficulty-badge {
+	display: inline-block;
+	font-size: var(--text-sm);
+	font-weight: 600;
+	padding: 2px var(--space-sm);
+	border-radius: var(--radius-pill);
+	letter-spacing: 0.03em;
+	vertical-align: middle;
+	white-space: nowrap;
+	color: #fff;
+}
+
+.difficulty--0 { background-color: color-mix(in srgb, var(--color-difficulty-0) 75%, transparent); }
+.difficulty--1 { background-color: color-mix(in srgb, var(--color-difficulty-1) 75%, transparent); color: #3a2f00; }
+.difficulty--2 { background-color: color-mix(in srgb, var(--color-difficulty-2) 75%, transparent); }
+.difficulty--3 { background-color: color-mix(in srgb, var(--color-difficulty-3) 75%, transparent); }
+
+[hidden] { display: none !important; }
+.hidden { display: none !important; }
+.print-only { display: none; }
+
+/* Prevent iOS Safari from zooming in on input focus (triggered when font-size < 16px).
+   !important is needed to override class-based styles like .filter-input. */
+@media (hover: none) and (pointer: coarse) {
+	input, select, textarea {
+		font-size: 16px !important;
+	}
+}
+/* ============================================================
+   print-styles-core.njk — @media print styles for dance pages and the
+   regular program page (native browser print); included by base.njk.
+   (The dedicated program print preview uses Paged.js + print-paged.css.)
+   ============================================================ */
+
+@media print {
+
+.no-print { display: none !important; }
+
+body, main {
+	font-family: Georgia, 'Times New Roman', serif;
+	font-size: 10pt;
+	line-height: 1.4;
+	color: #000;
+	background: #fff;
+	margin: 0;
+	padding: 0;
+	max-width: none;
+}
+
+main { padding: 0; }
+
+a { color: #000; text-decoration: none; }
+
+a[href]:after { content: none !important; }
+
+.dance-card {
+	max-width: none;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	background: #fff;
+}
+
+.dance-header {
+	margin-bottom: 12pt;
+	padding-bottom: 8pt;
+	border-bottom: 1.5pt solid #000;
+}
+
+.dance-header-top {
+	display: flex;
+	align-items: baseline;
+	gap: 10pt;
+}
+
+.dance-title {
+	font-size: 18pt;
+	font-weight: bold;
+	margin: 0;
+	line-height: 1.2;
+}
+
+.dance-type-badge {
+	font-size: 8pt;
+	font-weight: bold;
+	padding: 1pt 5pt;
+	border: 1pt solid #000;
+	border-radius: 999pt;
+	background: none !important;
+	color: #000 !important;
+	text-transform: lowercase;
+	letter-spacing: 0.03em;
+}
+
+.difficulty-badge {
+	font-size: 8pt;
+	font-weight: bold;
+	padding: 1pt 5pt;
+	border: 1pt solid #000;
+	border-radius: 999pt;
+	background: none !important;
+	color: #000 !important;
+	letter-spacing: 0.03em;
+}
+
+.dance-meta {
+	font-size: 9pt;
+	color: #333;
+	margin: 4pt 0 0;
+}
+
+.dance-header-description {
+	font-size: 9pt;
+	max-width: 40%;
+}
+
+.dance-card h2 {
+	font-size: 7.5pt;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: #444;
+	border-bottom: 0.5pt solid #aaa;
+	padding-bottom: 2pt;
+	margin-bottom: 6pt;
+	margin-top: 14pt;
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+.choreography-header {
+	border-bottom: 0.5pt solid #aaa;
+	padding-bottom: 2pt;
+	margin-bottom: 6pt;
+	margin-top: 14pt;
+}
+
+.dance-card .choreography-header h2 {
+	border-bottom: none;
+	padding-bottom: 0;
+	margin: 0;
+}
+
+.tunes-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 9pt;
+}
+
+.tunes-table th {
+	font-weight: bold;
+	padding: 2pt 4pt;
+	border-bottom: 0.75pt solid #000;
+	text-align: left;
+}
+
+.tunes-table td {
+	padding: 2pt 4pt;
+	vertical-align: top;
+}
+
+.tunes-table tbody tr:nth-child(even) { background: none; }
+
+.choreo-sections { display: block; }
+
+.choreo-section {
+	display: grid;
+	grid-template-columns: 2.5rem 1fr;
+	gap: 6pt;
+	align-items: baseline;
+	page-break-inside: avoid;
+	break-inside: avoid;
+	margin-bottom: 5pt;
+}
+
+.section-label {
+	font-size: 8pt;
+	font-variant: small-caps;
+	font-weight: bold;
+	letter-spacing: 0.06em;
+	color: #333;
+	margin: 0;
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+.section-description {
+	font-size: 10pt;
+	margin: 0;
+	line-height: 1.4;
+}
+
+.teaching-notes-section {
+	page-break-inside: avoid;
+	break-inside: avoid;
+}
+
+.teaching-notes-section p,
+.background-section p {
+	font-size: 9pt;
+	color: #333;
+	margin: 0 0 5pt;
+}
+
+.teaching-notes-section p:last-child,
+.background-section p:last-child { margin-bottom: 0; }
+
+.teaching-notes-section li,
+.background-section li { font-size: 9pt; color: #333; }
+
+.teaching-notes-section blockquote,
+.background-section blockquote {
+	font-style: italic;
+	border-left: 0.5pt solid #aaa;
+	margin: 3pt 0 3pt 12pt;
+	padding-left: 8pt;
+}
+
+.teaching-notes-section blockquote p,
+.background-section blockquote p { margin-bottom: 2pt; }
+
+.teaching-notes-section,
+.background-section { hyphens: auto; }
+
+p, li { widows: 2; orphans: 2; }
+
+* { box-shadow: none !important; }
+
+.print-only { display: block; }
+
+/* Program table — shared by program page and print page */
+.program-table {
+	font-size: 7pt;
+	table-layout: fixed;
+	width: 100%;
+}
+
+.program-table th,
+.program-table td {
+	padding: 2pt 3pt;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.program-table th { font-size: 6pt; white-space: nowrap; }
+
+.program-table td:nth-child(1),
+.program-table td:nth-child(2),
+.program-table td:nth-child(4),
+.program-table td:nth-child(7),
+.program-table td:nth-child(8) {
+	white-space: normal;
+	overflow-wrap: break-word;
+	word-break: break-word;
+}
+
+.program-table .col-title       { width: 16%; }
+.program-table .col-choreographer { width: 14%; }
+.program-table .col-year        { width: 5%; }
+.program-table .col-formation   { width: 14%; }
+.program-table .col-key         { width: 11%; }
+.program-table .col-meter       { width: 5%; }
+.program-table .col-tune        { width: 14%; }
+.program-table .col-composer    { width: 13%; }
+.program-table .col-source      { width: 8%; }
+
+.program-table th:first-child,
+.program-table td:first-child { position: static; box-shadow: none; }
+
+.program-table-actions { display: none !important; }
+
+.dots-section { display: none !important; }
+
+/* Program header — used by main program page and print page */
+.program-title { font-size: 20pt; font-weight: bold; margin: 0 0 4pt; }
+.program-meta { font-size: 10pt; color: #333; margin: 0 0 18pt; }
+
+/* Program TOC — shared between main page and print page */
+.program-section-label {
+	font-size: 7.5pt;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: #444;
+	border-bottom: 0.5pt solid #aaa;
+	padding-bottom: 2pt;
+	margin-bottom: 5pt;
+	margin-top: 14pt;
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+.program-dance-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	counter-reset: program-dance;
+}
+
+.program-dance-item {
+	counter-increment: program-dance;
+	display: grid;
+	grid-template-columns: 1.5rem 1fr;
+	gap: 0 6pt;
+	background: none;
+	border: none;
+	box-shadow: none;
+	padding: 2pt 0;
+}
+
+.program-dance-item::before {
+	content: counter(program-dance) ".";
+	font-size: 9pt;
+	color: #555;
+	padding-top: 0;
+}
+
+.program-dance-main {
+	display: flex;
+	align-items: baseline;
+	gap: 6pt;
+}
+
+.program-dance-link { font-size: 10pt; font-weight: normal; color: #000; flex: 1; }
+.program-dance-author { font-size: 8.5pt; color: #555; }
+.program-dance-note {
+	font-size: 8.5pt;
+	color: #555;
+	font-style: italic;
+	margin-top: 0;
+	grid-column: 2;
+}
+
+}
+/* ============================================================
+	 base.njk — print styles (program-page-specific)
+	 ============================================================ */
+
+@page { margin: 0.75in; }
+
+@media print {
+
+.program-notes {
+	font-size: 9pt;
+	color: #333;
+	margin-bottom: 16pt;
+}
+
+/* Program view toolbar hidden in print (parent .no-print also hides it,
+   but this is defence-in-depth in case the toolbar moves outside .no-print) */
+.program-view-toolbar {
+	display: none !important;
+}
+
+/* Hide program header/notes in print unless program (TOC) view is active */
+body:not(:has(.program-view--program:not([hidden]))) .program-header-block {
+	display: none;
+}
+
+/* Page break between consecutive visible program views */
+.program-view:not([hidden]) + .program-view:not([hidden]) {
+	page-break-before: always;
+	break-before: page;
+}
+
+/* Table view — rotated 90° to print landscape on a portrait page.
+   Uses fixed US Letter dimensions (8.5in × 11in) minus 0.75in margins
+   on each side so layout is consistent regardless of browser window size.
+   Width  = 11in - 1.5in = 9.5in (printable page height, becomes horizontal after rotation).
+   Height = 8.5in - 1.5in = 7in  (printable page width, becomes vertical after rotation). */
+.program-view--table {
+	width: 9.5in;
+	height: 7in;
+	transform: rotate(90deg) translateY(-100%);
+	transform-origin: top left;
+	overflow: hidden;
+}
+
+.program-view--table .program-table-wrapper {
+	overflow: hidden;
+	height: 100%;
+}
+
+.program-card-wrapper + .program-card-wrapper {
+	page-break-before: always;
+	break-before: page;
+}
+
+.program-card-wrapper .dance-card {
+	max-width: none;
+	border: none;
+	padding: 0;
+}
+
+}

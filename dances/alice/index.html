@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Alice</title>
+	
+	
+
+	
+	<link rel="stylesheet" href="/bundle/JWCRhBebJ0.css">
+	<script>window.PATH_PREFIX = "/";</script>
+</head>
+<body>
+	<nav class="site-nav no-print">
+		<a href="/" class="site-title"></a>
+		<div class="site-nav-links">
+			<a href="/" class="site-nav-link">Dances</a>
+			<a href="/programs/" class="site-nav-link">Programs</a>
+		</div>
+	</nav>
+	<main>
+		
+
+
+<div class="page-actions no-print">
+	<a href="/" class="back-link" id="dance-back-link">&#8592; All dances</a>
+	<button class="print-btn" onclick="window.print()">Print card</button>
+</div>
+<script>
+(function () {
+	var p = new URLSearchParams(location.search);
+	var slug = p.get("from_program");
+	var title = p.get("from_title");
+	var date = p.get("from_date");
+	var views = p.get("from_views");
+	if (slug && title) {
+		var a = document.getElementById("dance-back-link");
+		var href = "/programs/" + slug + "/";
+		if (views) href += "?views=" + encodeURIComponent(views);
+		a.href = href;
+		a.textContent = "← " + title + (date ? " (" + date + ")" : "");
+	}
+})();
+</script>
+
+
+
+<article class="dance-card">
+	
+
+<header class="dance-header">
+	<div class="dance-header-top">
+		<h1 class="dance-title">Alice</h1>
+		<span class="dance-type-badge dance-type--english">english</span>
+		
+	</div>
+	
+	<div class="dance-header-lower dance-header-lower--has-description">
+		<p class="dance-meta">
+			<span class="author">Philippe Callens</span>
+			<span class="year">(2002)</span>
+			
+		</p>
+		<p class="dance-formation">duple minor longways</p>
+		<p class="dance-header-description">graceful waltz dance, accessible, low on Figures(tm)</p>
+	</div>
+</header>
+
+	
+
+
+
+<p class="tune-inline">
+	<span class="tune-title">Siciliano</span>
+	
+	<span class="tune-detail">Georg Telemann</span>
+	
+	
+	<span class="tune-detail">3/4</span>
+	<span class="tune-detail">A major</span>
+	<span class="tune-detail">1716</span>
+	<span class="tune-detail">BII p. 3</span>
+	<span class="tune-sep no-print"> · </span><a class="dots-link no-print" href="/static/dots/alice.png" target="_blank">Sheet music ↗</a>
+</p>
+
+
+	
+
+
+<section class="choreography-section">
+	<div class="choreography-header">
+		<h2>Choreography</h2>
+		<span class="difficulty-badge difficulty--0">v. easy</span>
+	</div>
+	<div class="choreo-sections" data-pagefind-body="">
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A1</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">1<sup>st</sup> corners set in place, right hand turn half</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">A2</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-4)</span>
+					<span class="figure-description">2<sup>nd</sup> corners, the same</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+		<div class="choreo-section">
+			<h3 class="section-label">B</h3>
+			
+			<ul class="figure-list">
+				
+				<li class="figure">
+					<span class="figure-bars">(1-2)</span>
+					<span class="figure-description">All fall back (without hands) in two single steps</span>
+					<span class="figure-beats">(6)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(3-4)</span>
+					<span class="figure-description">Cross, passing partner by right shoulder</span>
+					<span class="figure-beats">(6)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars"></span>
+					<span class="figure-description">Turn to face clockwise around the minor set</span>
+					<span class="figure-beats"></span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(5-8)</span>
+					<span class="figure-description">Single file chase clockwise</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+				<li class="figure">
+					<span class="figure-bars">(9-12)</span>
+					<span class="figure-description">Partners two hand turn</span>
+					<span class="figure-beats">(12)</span>
+				</li>
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+</section>
+
+
+	
+
+
+
+<section class="teaching-notes-section">
+	<h2>Teaching Notes</h2>
+	<div><p>A1/A2. Sets are in place, without moving forward</p>
+</div>
+</section>
+
+
+	
+
+
+
+<section class="dots-section no-print">
+	<h2>Sheet Music</h2>
+	
+	
+	
+	<img class="dots-image" src="/static/dots/alice.png" alt="Siciliano sheet music">
+	
+	
+</section>
+
+
+</article>
+
+
+	</main>
+</body>
+</html>
