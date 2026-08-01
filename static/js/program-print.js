@@ -51,6 +51,22 @@ const PAGE_SIZES = {
 	"4x6": { w: 4, h: 6, margin: 0.375 },
 };
 const CUSTOM_MARGIN = 0.5;
+// Bottom margin is trimmed relative to the other three sides, giving sheet
+// music (which forces its own full-page image/embed) a better chance of
+// sharing a page with the choreography above it. Shared by the @page CSS
+// and the "Open as PDF" placement so the two stay in sync.
+const BOTTOM_MARGIN_SCALE = 0.5;
+const TOP_MARGIN_SCALE = 0.8;
+
+function currentPageMargins() {
+	const sz = currentPageSize();
+	return {
+		top: sz.margin * TOP_MARGIN_SCALE,
+		right: sz.margin,
+		bottom: sz.margin * BOTTOM_MARGIN_SCALE,
+		left: sz.margin,
+	};
+}
 
 // Safari (and every iOS browser, which is WebKit underneath) ignores
 // @page { margin: 0 }, so Paged.js's full-sheet page boxes overflow Safari's
@@ -393,11 +409,15 @@ function buildSegments() {
 function buildDynamicCss(landscape) {
 	const sz = currentPageSize();
 	const size = landscape ? `${sz.h}in ${sz.w}in` : `${sz.w}in ${sz.h}in`;
+	const m = currentPageMargins();
 	// --text-scale multiplies every font-size (and the text-anchored column
 	// widths) in print-paged.css, so pagination re-flows at the chosen size.
 	const textScale = currentTextSize() / DEFAULT_TEXT_SIZE;
-	return `@page { size: ${size}; margin: ${sz.margin}in; }\n` +
-		`.pagedjs_page { --text-scale: ${textScale}; }\n`;
+	// --page-margin-x lets sheet music bleed into half the left/right margin
+	// (print-paged.css: width: calc(100% + var(--page-margin-x)), pulled in
+	// by half that on each side) — left and right are always equal.
+	return `@page { size: ${size}; margin: ${m.top}in ${m.right}in ${m.bottom}in ${m.left}in; }\n` +
+		`.pagedjs_page { --text-scale: ${textScale}; --page-margin-x: ${m.left}in; }\n`;
 }
 
 // Paged writes the page-size custom properties to :root AND to per-side
@@ -405,8 +425,8 @@ function buildDynamicCss(landscape) {
 // stylesheet, so a later segment's render resizes an earlier segment's
 // pages. Freeze this segment by setting the size vars INLINE on each
 // .pagedjs_page — inline beats the injected per-side rules — plus on the
-// container as a fallback. (Margins are symmetric and identical across
-// segments, so only the width/height family needs pinning.)
+// container as a fallback. (Margins are identical across segments — same
+// four values on every page — so only the width/height family needs pinning.)
 const PIN_W = ["--pagedjs-width", "--pagedjs-width-left", "--pagedjs-width-right", "--pagedjs-pagebox-width"];
 const PIN_H = ["--pagedjs-height", "--pagedjs-height-left", "--pagedjs-height-right", "--pagedjs-pagebox-height"];
 function pinPageVars(pagesEl, landscape) {
@@ -710,7 +730,7 @@ async function buildPdf(isCancelled, onProgress) {
 			throw new Error("PDF libraries unavailable");
 		}
 		const JsPDF = window.jspdf.jsPDF;
-		const margin = currentPageSize().margin;
+		const margin = currentPageMargins();
 
 		const sheets = Array.from(stage.querySelectorAll(".pagedjs_sheet"));
 		const first = sheetInches(sheets[0]);
@@ -746,7 +766,8 @@ async function buildPdf(isCancelled, onProgress) {
 			}
 			doc.addImage(
 				canvas.toDataURL("image/png"), "PNG",
-				margin, margin, dim.w - 2 * margin, dim.h - 2 * margin
+				margin.left, margin.top,
+				dim.w - margin.left - margin.right, dim.h - margin.top - margin.bottom
 			);
 			// Free the canvas before the next page.
 			canvas.width = canvas.height = 0;

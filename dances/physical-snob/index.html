@@ -8,7 +8,7 @@
 	
 
 	
-	<link rel="stylesheet" href="/ghpages-choreodex/bundle/JhF6VpRwSn.css">
+	<link rel="stylesheet" href="/ghpages-choreodex/bundle/VmsQKartVO.css">
 	<script>window.PATH_PREFIX = "/ghpages-choreodex/";</script>
 </head>
 <body>
@@ -36,7 +36,8 @@
 	var views = p.get("from_views");
 	if (slug && title) {
 		var a = document.getElementById("dance-back-link");
-		var href = "/programs/" + slug + "/";
+		var prefix = (window.PATH_PREFIX || "/").replace(/\/$/, "");
+		var href = prefix + "/programs/" + slug + "/";
 		if (views) href += "?views=" + encodeURIComponent(views);
 		a.href = href;
 		a.textContent = "← " + title + (date ? " (" + date + ")" : "");
@@ -65,7 +66,7 @@
 			</p>
 			<p class="dance-formation">3C</p>
 		</div>
-		<p class="dance-header-description">poussettes and R vs. L file practice; dead easy.</p>
+		<p class="dance-header-description">poussettes and R vs. L file practice; dead easy. Slipjig!</p>
 	</div>
 </header>
 
@@ -254,12 +255,6 @@
 	
 
 
-<section class="background-section">
-	<h2>Background</h2>
-	<div><p>It’s a slipjig!! (dots linked are in G but tune in F)</p>
-</div>
-</section>
-
 
 <section class="teaching-notes-section">
 	<h2>Teaching Notes</h2>
@@ -273,8 +268,7 @@
 
 
 
-<section class="dots-section no-print">
-	<h2>Sheet Music</h2>
+<section class="dots-section">
 	
 	
 	

@@ -128,6 +128,35 @@
 	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
 }
 
+.pagedjs_page .choreography-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6pt;
+	border-bottom: 0.5pt solid #aaa;
+	padding-bottom: 2pt;
+	margin-top: 14pt;
+	margin-bottom: 6pt;
+}
+
+.pagedjs_page .dance-card .choreography-header h2 {
+	border-bottom: none;
+	padding-bottom: 0;
+	margin: 0;
+}
+
+.pagedjs_page .difficulty-badge {
+	font-size: calc(8pt * var(--text-scale, 1));
+	font-weight: bold;
+	padding: 1pt 5pt;
+	border: 1pt solid #000;
+	border-radius: 999pt;
+	background: none !important;
+	color: #000 !important;
+	letter-spacing: 0.03em;
+	white-space: nowrap;
+}
+
 /* ── Tunes ── */
 .pagedjs_page .tune-inline {
 	font-size: calc(9pt * var(--text-scale, 1));
@@ -260,6 +289,29 @@
 
 .pagedjs_page p,
 .pagedjs_page li { widows: 2; orphans: 2; }
+
+/* ── Sheet music ── */
+/* Bleed into half the page's L/R margin on each side — sheet music doesn't
+   need to respect the same text margins as the dance card. --page-margin-x
+   is set per-render alongside --text-scale (see buildDynamicCss). */
+.pagedjs_page .dots-image,
+.pagedjs_page .dots-embed {
+	width: calc(100% + var(--page-margin-x, 0in));
+	margin-left: calc(var(--page-margin-x, 0in) / -2);
+	margin-right: calc(var(--page-margin-x, 0in) / -2);
+	margin-top: 12pt;
+	border: none;
+}
+
+.pagedjs_page .dots-image {
+	max-width: none;
+	height: auto;
+}
+
+.pagedjs_page .dots-embed {
+	height: 9in;
+	max-height: 95vh;
+}
 
 /* ── Program TOC (table of contents view) ── */
 .pagedjs_page .print-program-header {
